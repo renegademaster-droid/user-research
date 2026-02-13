@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import { theme } from "design-system";
 import { AppLayout } from "./components/AppLayout";
 import App from "./App";
@@ -12,6 +12,7 @@ import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
+    <ColorModeScript initialColorMode="light" storageKey="user-research-color-mode" />
     <ChakraProvider theme={theme}>
       <BrowserRouter basename="/user-research">
         <Routes>

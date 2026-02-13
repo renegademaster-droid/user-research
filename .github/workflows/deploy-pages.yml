@@ -16,31 +16,39 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-      # Use real design system: clone chakra-design-system-demo, use src/design-system.
-      # Repo: https://github.com/renegademaster-droid/chakra-design-system-demo/tree/main/src/design-system
-      - name: Clone chakra-design-system-demo (design system)
-        id: clone-design-system
+      # Prefer submodule, else clone chakra-design-system-demo so prod uses real Chakra design system.
+      # Add submodule: git submodule add https://github.com/renegademaster-droid/chakra-design-system-demo.git chakra-design-system-demo
+      - name: Ensure design system (submodule or clone)
+        id: design-system
         run: |
-          git clone --depth 1 --branch main "https://github.com/${{ github.repository_owner }}/chakra-design-system-demo.git" chakra-design-system-demo 2>/dev/null || true
           if [ -f chakra-design-system-demo/src/design-system/package.json ]; then
             echo "design_system=repo" >> $GITHUB_OUTPUT
+            echo "Using design system from submodule"
           else
-            echo "design_system=ci-stub" >> $GITHUB_OUTPUT
+            git clone --depth 1 --branch main "https://github.com/${{ github.repository_owner }}/chakra-design-system-demo.git" chakra-design-system-demo 2>/dev/null || true
+            if [ -f chakra-design-system-demo/src/design-system/package.json ]; then
+              echo "design_system=repo" >> $GITHUB_OUTPUT
+              echo "Using design system from clone"
+            else
+              echo "design_system=ci-stub" >> $GITHUB_OUTPUT
+              echo "::warning::Using CI stub; add chakra-design-system-demo submodule for full design system"
+            fi
           fi
 
-      - name: Point design-system to cloned package or stub
+      - name: Point design-system to repo or stub
         run: |
-          if [ "${{ steps.clone-design-system.outputs.design_system }}" = "repo" ]; then
+          if [ "${{ steps.design-system.outputs.design_system }}" = "repo" ]; then
             sed -i.bak 's|"design-system": "file:../chakra-app"|"design-system": "file:./chakra-design-system-demo/src/design-system"|' package.json
           else
             sed -i.bak 's|"design-system": "file:../chakra-app"|"design-system": "file:./ci-stub/design-system"|' package.json
           fi
           rm -f package.json.bak
 
-      # Build design system when using real repo so prod gets full theme/components
-      - name: Build design system (chakra-design-system-demo)
-        if: steps.clone-design-system.outputs.design_system == 'repo'
+      - name: Build design system (when using real repo)
+        if: steps.design-system.outputs.design_system == 'repo'
         run: |
           (cd chakra-design-system-demo && npm install && npm run build) 2>/dev/null || true
           (cd chakra-design-system-demo/src/design-system && npm install && npm run build) 2>/dev/null || true

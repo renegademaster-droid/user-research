@@ -30,13 +30,26 @@ npm run dev
 
 The design system is linked from `../chakra-app`. Ensure that path exists and that `chakra-app` has been built or is available.
 
+## Chakra design system in production
+
+For the **deployed app** to use the real Chakra design system (theme, components, tokens) instead of the minimal CI stub, add the design-system repo as a **git submodule**:
+
+```bash
+git submodule add https://github.com/renegademaster-droid/chakra-design-system-demo.git chakra-design-system-demo
+git add .gitmodules chakra-design-system-demo
+git commit -m "Add chakra-design-system-demo submodule for design system"
+git push
+```
+
+After that, the deploy workflow will use `chakra-design-system-demo/src/design-system` and production will follow the Chakra design system. Without the submodule, the workflow falls back to cloning the repo (if same GitHub account) or the in-repo stub.
+
 ## GitHub Pages
 
 To avoid a blank page and “disallowed MIME type” errors:
 
 1. **Settings → Pages → Build and deployment → Source** must be **GitHub Actions** (not “Deploy from a branch”).  
    Otherwise the site serves the raw repo and the browser tries to load `/src/main.tsx` instead of the built app.
-2. Open the app at **`https://<your-username>.github.io/userresearch/`** (with the `/userresearch/` path and trailing slash).
+2. Open the app at **`https://renegademaster-droid.github.io/user-research/`** (with the `/user-research/` path and trailing slash).
 
 ## Scripts
 

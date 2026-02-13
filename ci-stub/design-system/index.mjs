@@ -26,6 +26,10 @@ import {
 } from "@chakra-ui/react";
 
 export const theme = extendTheme({
+  config: {
+    initialColorMode: "light",
+    useSystemColorMode: false,
+  },
   semanticTokens: {
     colors: {
       "figma.fg": { default: "gray.800", _dark: "white" },
