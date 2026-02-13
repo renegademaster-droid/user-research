@@ -1,4 +1,29 @@
-import { extendTheme } from "@chakra-ui/react";
+import React from "react";
+import {
+  extendTheme,
+  Box,
+  Container,
+  Heading,
+  HStack,
+  Link,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+  Badge,
+  Button as ChakraButton,
+  Text,
+  Card as ChakraCard,
+  VStack,
+  Textarea,
+  Input,
+  Spinner,
+  Divider,
+  Select,
+  useDisclosure,
+  Modal,
+} from "@chakra-ui/react";
 
 export const theme = extendTheme({
   semanticTokens: {
@@ -12,27 +37,17 @@ export const theme = extendTheme({
   },
 });
 
-export {
-  Box,
-  Container,
-  Heading,
-  HStack,
-  Link,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
-  Badge,
-  Button,
-  Text,
-  Card,
-  VStack,
-  Textarea,
-  Input,
-  Spinner,
-  Divider,
-  Select,
-  useDisclosure,
-} from "@chakra-ui/react";
+// App uses label prop; Chakra Button uses children.
+export function Button(props) {
+  const { label, children, ...rest } = props;
+  return React.createElement(ChakraButton, rest, label ?? children);
+}
+
+// App uses cardVariant; Chakra Card uses variant.
+export function Card(props) {
+  const { cardVariant, variant, ...rest } = props;
+  return React.createElement(ChakraCard, { ...rest, variant: cardVariant ?? variant });
+}
+
+export { Box, Container, Heading, HStack, Link, Tabs, TabList, Tab, TabPanels, TabPanel, Badge, Text, VStack, Textarea, Input, Spinner, Divider, Select, useDisclosure };
 export { Modal as Dialog } from "@chakra-ui/react";
