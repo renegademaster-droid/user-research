@@ -1,5 +1,5 @@
 # GitHub Pages: Settings → Pages → Source = "Deploy from a branch", Branch = gh-pages, Folder = / (root).
-# Then open: https://<username>.github.io/userresearch/
+# Then open: https://renegademaster-droid.github.io/user-research/
 name: Deploy to GitHub Pages
 
 on:
@@ -68,7 +68,7 @@ jobs:
           fi
           echo "Build OK: index references compiled assets"
 
-      # SPA fallback: direct URLs (e.g. /userresearch/survey/123) serve the app
+      # SPA fallback: direct URLs (e.g. /user-research/survey/123) serve the app
       - name: Add 404 page for client-side routing
         run: cp dist/index.html dist/404.html
 

@@ -13,7 +13,7 @@ import "./index.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
-      <BrowserRouter basename="/userresearch">
+      <BrowserRouter basename="/user-research">
         <Routes>
           <Route element={<AppLayout />}>
             <Route path="/" element={<App />} />
