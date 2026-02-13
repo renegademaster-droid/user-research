@@ -1,0 +1,10 @@
+{
+  "name": "design-system",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "index.mjs",
+  "peerDependencies": {
+    "@chakra-ui/react": "*",
+    "react": "*"
+  }
+}

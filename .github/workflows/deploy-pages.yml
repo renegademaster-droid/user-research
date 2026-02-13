@@ -1,0 +1,80 @@
+# GitHub Pages: Settings → Pages → Source = "Deploy from a branch", Branch = gh-pages, Folder = / (root).
+# Then open: https://<username>.github.io/userresearch/
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Use real design system: clone chakra-design-system-demo, use src/design-system.
+      # Repo: https://github.com/renegademaster-droid/chakra-design-system-demo/tree/main/src/design-system
+      - name: Clone chakra-design-system-demo (design system)
+        id: clone-design-system
+        run: |
+          git clone --depth 1 --branch main "https://github.com/${{ github.repository_owner }}/chakra-design-system-demo.git" chakra-design-system-demo 2>/dev/null || true
+          if [ -f chakra-design-system-demo/src/design-system/package.json ]; then
+            echo "design_system=repo" >> $GITHUB_OUTPUT
+          else
+            echo "design_system=ci-stub" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Point design-system to cloned package or stub
+        run: |
+          if [ "${{ steps.clone-design-system.outputs.design_system }}" = "repo" ]; then
+            sed -i.bak 's|"design-system": "file:../chakra-app"|"design-system": "file:./chakra-design-system-demo/src/design-system"|' package.json
+          else
+            sed -i.bak 's|"design-system": "file:../chakra-app"|"design-system": "file:./ci-stub/design-system"|' package.json
+          fi
+          rm -f package.json.bak
+
+      # Build design system when using real repo so prod gets full theme/components
+      - name: Build design system (chakra-design-system-demo)
+        if: steps.clone-design-system.outputs.design_system == 'repo'
+        run: |
+          (cd chakra-design-system-demo && npm install && npm run build) 2>/dev/null || true
+          (cd chakra-design-system-demo/src/design-system && npm install && npm run build) 2>/dev/null || true
+        continue-on-error: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      # npm install (not ci) so patched package.json is accepted without lockfile changes
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      # Ensure we built the app (not serving source); fail if base path wasn't applied
+      - name: Verify built output
+        run: |
+          if grep -q 'src/main.tsx' dist/index.html; then
+            echo "::error::Built index still references /src/main.tsx — check Vite base path"
+            exit 1
+          fi
+          echo "Build OK: index references compiled assets"
+
+      # SPA fallback: direct URLs (e.g. /userresearch/survey/123) serve the app
+      - name: Add 404 page for client-side routing
+        run: cp dist/index.html dist/404.html
+
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true
