@@ -1,0 +1,3 @@
+[submodule "chakra-design-system-demo"]
+	path = chakra-design-system-demo
+	url = https://github.com/renegademaster-droid/chakra-design-system-demo.git
